@@ -1,0 +1,30 @@
+.login_form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: url(../../assets/bg.jpg) no-repeat;
+  background-size: cover;
+  background-position: bottom;
+}
+
+.login_container {
+  background-color: #333333;
+
+  -webkit-box-shadow: 5px 5px 18px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 5px 5px 18px 5px rgba(0, 0, 0, 0.3);
+  border-radius: 5px;
+  padding: 20px;
+  width: 350px;
+}
+
+.login_logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.login_logo > img {
+  width: 98px;
+  height: 97px;
+}
