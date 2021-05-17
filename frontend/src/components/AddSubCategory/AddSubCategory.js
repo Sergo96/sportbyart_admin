@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useParams } from 'react-router';
 
 const AddSubCategory = (props) => {
   const [subCategoryName, subSubCategoryName] = useState('');
-  console.log('subcategoryname', subCategoryName);
   const [getCategory, setGetCategory] = useState([]);
   const [getCategoryId, setGetCategoryId] = useState('');
-  console.log('category title', getCategoryId);
+
+  const [getSubCategoryEdit, setSubGetCategoryEdit] = useState([]);
+
+  console.log(getSubCategoryEdit);
+
+  const params = useParams();
+  console.log(params);
+  // this id for updating categories
+  const resultsId = params.id;
 
   const [authTokens, setAuthTokens] = useState(
     localStorage.getItem('token') || ''
@@ -18,6 +26,7 @@ const AddSubCategory = (props) => {
   };
   const userToken = props.token;
 
+  // to get category list
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -31,6 +40,7 @@ const AddSubCategory = (props) => {
     console.log(fetchData());
   }, []);
 
+  // function to add sub category
   const addSubCategory = async (event) => {
     const subcategoryData = {
       title: subCategoryName,
@@ -59,6 +69,49 @@ const AddSubCategory = (props) => {
       console.log(err);
     }
   };
+  //  to get sub category values
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/sub-category/get/${resultsId}`
+        );
+        setSubGetCategoryEdit(res.data);
+        setGetCategoryId(res.data.category);
+        subSubCategoryName(res.data.title);
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchData();
+    console.log(fetchData());
+  }, []);
+
+  // to edit sub categories
+  async function updateSubCategory() {
+    let subCategoryData = {
+      subCategory_id: resultsId,
+    };
+
+    if (subCategoryName !== getSubCategoryEdit.title) {
+      subCategoryData.title = subCategoryName;
+    }
+
+    const requestOptions = {
+      method: 'PUT',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        authorization: `${userToken}`,
+      },
+      body: JSON.stringify(subCategoryData),
+    };
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/sub-category/update`,
+      requestOptions
+    );
+    const data = await response.json();
+  }
 
   return (
     <form value={{ authTokens, setAuthTokens: setTokens }} action=''>
@@ -98,6 +151,14 @@ const AddSubCategory = (props) => {
           className='btn btn-primary'
         >
           Add Subcategory
+        </button>
+        <button
+          style={{ marginTop: '20px' }}
+          onClick={updateSubCategory}
+          type='button'
+          className='btn btn-primary'
+        >
+          Edit Subcategory
         </button>
       </div>
     </form>

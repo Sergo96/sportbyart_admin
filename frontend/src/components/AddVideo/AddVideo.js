@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import 'antd/dist/antd.css';
 import { Input } from 'antd';
 import axios from 'axios';
+import { useParams } from 'react-router';
 
 const { TextArea } = Input;
 
@@ -11,8 +12,12 @@ const AddVideo = (props) => {
   const [videoTitle, setVideoTitle] = useState('');
   const [videoDesc, setVideoDesc] = useState('');
   const [videoLink, setVideoLink] = useState('');
+  const [editValues, setEditValues] = useState([]);
 
   const userToken = props.token;
+  const params = useParams();
+  console.log(params);
+  const resultsId = params.id;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,6 +61,67 @@ const AddVideo = (props) => {
       console.log(err);
     }
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/video/get/${resultsId}`,
+          {
+            headers: {
+              Accept: 'application/json',
+              'Content-Type': 'application/json',
+              authorization: `${userToken}`,
+            },
+          }
+        );
+        setEditValues(res.data);
+        setVideoTitle(res.data.title);
+        setVideoDesc(res.data.description);
+        setVideoLink(res.data.video);
+        setGetCategoryId(res.data.category_id);
+      } catch (err) {}
+    };
+    fetchData();
+  }, [resultsId]);
+
+  async function updateVideo() {
+    let videoData = {
+      video_id: resultsId,
+      author_id: editValues.author_id,
+    };
+
+    if (videoTitle !== editValues.title) {
+      videoData.title = videoTitle;
+    }
+
+    if (videoDesc !== editValues.description) {
+      videoData.description = videoDesc;
+    }
+
+    if (videoLink !== editValues.video) {
+      videoData.video = videoLink;
+    }
+
+    if (getCategoryId !== editValues.category_id) {
+      videoData.category_id = getCategoryId;
+    }
+
+    const requestOptions = {
+      method: 'PUT',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+        authorization: `${userToken}`,
+      },
+      body: JSON.stringify(videoData),
+    };
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/video/update`,
+      requestOptions
+    );
+    const data = await response.json();
+  }
   return (
     <div>
       <form action=''>
@@ -105,6 +171,9 @@ const AddVideo = (props) => {
         </div>
         <button onClick={addVideo} type='button' className='btn btn-primary'>
           Submit
+        </button>
+        <button onClick={updateVideo} type='button' className='btn btn-primary'>
+          Edit
         </button>
       </form>
     </div>

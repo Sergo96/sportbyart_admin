@@ -161,15 +161,39 @@ const getUsers = async (req, res) => {
             throw new HTTPException("No admin rights for add new article", HTTP.FORBIDDEN);
         }
 
-        await User.find({}).then((result) => {
-            if(result == null || result.length == 0) {
-                throw new HTTPException("Can't find any user", HTTP.NOT_FOUND)
-            }
-            return res.status(HTTP.OK).json(result)
-        });
+        let page = req.params.page;
+        if(page == "all") {
+            await User.find({}).then((result) => {
+                if(result == null || result.length == 0) {
+                    throw new HTTPException("Can't find any user", HTTP.NOT_FOUND)
+                }
+                return res.status(HTTP.OK).json(result)
+            });
+        }
+        else {
+            page = parseInt(page);
+            const limit = 10;
+            
+            const users = await User.find({})
+            .skip((page * limit) - limit).limit(limit)
+            .then(result => {
+                if(result == null || result.length == 0) {
+                    throw new HTTPException("No result", HTTP.NOT_FOUND);
+                }
+
+                return result;
+            });
+
+            const count = await User.countDocuments();
+            const pageCount = Math.ceil(count/limit);
+
+            return res.status(HTTP.OK).json({'pageCount' : pageCount, users});
+        }
+        
 
     }
     catch(exception) {
+        console.log(exception)
         if (!(exception instanceof HTTPException)) {
             exception.statusCode = HTTP.INTERNAL_SERVER_ERROR;
             exception.message = 'Something went wrong';
@@ -218,7 +242,7 @@ const updateUser = async (req, res) => {
             user_id,
             username,
             email,
-            passowrd
+            password
         } = req.body;
 
         if(!user_id) throw new HTTPException("User id does not exist", HTTP.BAD_REQUEST);
@@ -233,11 +257,11 @@ const updateUser = async (req, res) => {
             return result;
         });
 
-        if(username) user.username = username;
+        if(username && username != "" && username != undefined) user.username = username;
 
-        if(email) user.email = email;
+        if(email && email != "" && email != undefined) user.email = email;
 
-        if(passowrd) {
+        if(password && password != "" && password != undefined) {
             if(password.length < 8) {
                 throw new HTTPException("Too short password", HTTP.FORBIDDEN)
             }

@@ -1,25 +1,32 @@
+// here is also pagination stuff whihc doesn't work properly
+
 import React, { useState, useEffect } from 'react';
 import 'antd/dist/antd.css';
 import './Articles.css';
-import { Table } from 'antd';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import { Link, useHistory } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router';
 
 const Articles = (props) => {
   const [articleData, setArticleData] = useState([]);
 
-  // console.log(auxToFetchBoard);
+  console.log(articleData.articles);
+  const [pageNumber, setPageNumber] = useState(); //here i have page numbers
+
+  console.log('page number', pageNumber);
+
+  const params = useParams();
+  // here is params of page numbers
+  let pageNumLink = params.page;
+
   console.log(articleData);
 
   let a = 0;
 
+  // this is to go back function
   const history = useHistory();
 
   const userToken = props.token;
-  console.log(userToken);
-
-  // useEffect(fetchBoard, [auxToFetchBoard]);
 
   const deletePost = (userId) => {
     const requestOptions = {
@@ -29,11 +36,9 @@ const Articles = (props) => {
         'Content-Type': 'application/json',
         authorization: `${userToken}`,
       },
-      // authorization: `${userToken}`,
     };
 
     // Note: I'm using arrow functions inside the `.fetch()` method.
-    // This makes it so you don't have to bind component functions like `setState`
     // to the component.
     fetch(
       `${process.env.REACT_APP_API_URL}/article/delete/` + userId,
@@ -47,17 +52,35 @@ const Articles = (props) => {
       });
   };
 
+  // here i get pagination numbers from backend
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/article/list/all`
+          `${process.env.REACT_APP_API_URL}/article/list/${pageNumLink}`
         );
-        setArticleData(res.data);
+        setArticleData(res.data.articles);
+        setPageNumber(res.data.pageCount);
       } catch (err) {}
     };
     fetchBlogs();
-  }, []);
+  }, [pageNumLink]);
+
+  // here is pagination logic which works horrible
+  var pagesArray = [];
+  let pageMinus = 3;
+  let pagePlus = 10;
+
+  if (pageNumLink < 3) {
+    pageMinus = 0;
+  }
+
+  if (pageNumber - pageNumLink < 10) {
+    pagePlus = 0;
+  }
+  for (let i = pageNumLink - pageMinus; i < pageNumber + pagePlus; i++) {
+    pagesArray.push(<Link to={`/articles/${i}`}>{i}</Link>);
+  }
 
   return (
     <div className='articles'>
@@ -106,6 +129,12 @@ const Articles = (props) => {
           })}
         </tbody>
       </table>
+      <div className='pagination'>
+        <a onClick={() => history.goBack()}>&laquo;</a>
+        {pagesArray}
+
+        <a href='#'>&raquo;</a>
+      </div>
     </div>
   );
 };

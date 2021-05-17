@@ -1,26 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 const Videos = (props) => {
   const [videoData, setVideoData] = useState([]);
+  const [videoPageNumber, setVideoPageNumber] = useState();
 
   let a = 0;
   const userToken = props.token;
 
-  console.log(videoData);
+  const params = useParams();
+  // here is params of page numbers
+  let pageNumLink = params.page;
+
+  // this is to go back function
+  const history = useHistory();
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/video/list/all`
+          `${process.env.REACT_APP_API_URL}/video/list/${pageNumLink}`
         );
-        setVideoData(res.data);
+        setVideoData(res.data.videos);
+        setVideoPageNumber(res.data.pageCount);
       } catch (err) {}
     };
     fetchBlogs();
-  }, []);
+  }, [pageNumLink]);
 
   const deleteVideo = (videoId) => {
     const requestOptions = {
@@ -47,6 +55,22 @@ const Videos = (props) => {
         console.log(result);
       });
   };
+
+  // here is pagination logic which works horrible
+  var pagesArray = [];
+  let pageMinus = 3;
+  let pagePlus = 10;
+
+  if (pageNumLink < 3) {
+    pageMinus = 0;
+  }
+
+  if (videoPageNumber - pageNumLink < 10) {
+    pagePlus = 0;
+  }
+  for (let i = pageNumLink - pageMinus; i < videoPageNumber + pagePlus; i++) {
+    pagesArray.push(<Link to={`/articles/${i}`}>{i}</Link>);
+  }
 
   return (
     <div className='videos'>
@@ -85,7 +109,7 @@ const Videos = (props) => {
                   </button>
                   <Link
                     className='btn btn-primary btn-sm'
-                    to={`/EditArticle/${video._id}`}
+                    to={`/editVideo/${video._id}`}
                   >
                     Edit
                   </Link>
@@ -95,6 +119,12 @@ const Videos = (props) => {
           })}
         </tbody>
       </table>
+      <div className='pagination'>
+        <a onClick={() => history.goBack()}>&laquo;</a>
+        {pagesArray}
+
+        <a href='#'>&raquo;</a>
+      </div>
     </div>
   );
 };

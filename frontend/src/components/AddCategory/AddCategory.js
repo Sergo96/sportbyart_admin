@@ -4,8 +4,7 @@ import axios from 'axios';
 
 const AddCategory = (props) => {
   const [categoryName, setCategoryName] = useState('');
-  //   console.log('category title', categoryName);
-  const [showInNav, setShowInNav] = useState(false);
+  const [showInNav, setShowInNav] = useState();
   console.log(showInNav);
   console.log('category false', showInNav);
   const [authTokens, setAuthTokens] = useState(
@@ -19,11 +18,14 @@ const AddCategory = (props) => {
     localStorage.setItem('token', JSON.stringify(data));
     setAuthTokens(data);
   };
+  // this token for authorization
   const userToken = props.token;
   const params = useParams();
   console.log(params);
+  // this id for updating categories
   const resultsId = params.id;
 
+  // this is the function to add category
   const addCategory = async (event) => {
     const categoryData = {
       title: categoryName,
@@ -52,6 +54,8 @@ const AddCategory = (props) => {
       console.log(err);
     }
   };
+
+  //  this is the get request to take categories data to display in fields to update!
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -78,7 +82,7 @@ const AddCategory = (props) => {
           </div>
           <input
             value={categoryName}
-            onChange={(input) => setCategoryName(input.target.value)}
+            onChange={(input) => setCategoryName(input.target.value)} // here i am taking values from inputs
             type='text'
             className='form-control'
           />

@@ -8,6 +8,31 @@ const { HTTP }              = require('../lib/constants');
 const { HTTPException }     = require('../lib/HTTPexception');
 const checkRights           = require('../lib/checkRights');
 
+//? Controller for get video by id
+const getVideo = async (req, res) => {
+    try{
+        await Video.findById({"_id" : req.params.id}).catch(exception => {
+            if(exception) {
+                throw new HTTPException("Wrong id", HTTP.BAD_REQUEST);
+            }
+        }).then((result) => {
+            if(result == null || result.length == 0) {
+                throw new HTTPException("No result", HTTP.NOT_FOUND);
+            }
+
+            return res.status(HTTP.OK).json(result);
+        });
+
+    }
+    catch(exception) {
+        if (!(exception instanceof HTTPException)) {
+            exception.statusCode = HTTP.INTERNAL_SERVER_ERROR;
+            exception.message = 'Something went wrong';
+        }
+        return res.status(exception.statusCode).json({ message: exception.message });
+    }
+}
+
 
 //? Controller for get all video list
 const getVideos = async (req, res) => {
@@ -27,15 +52,21 @@ const getVideos = async (req, res) => {
             page = parseInt(page);
             const limit = 10;
             
-            await Video.find({})
+            const videos = await Video.find({})
             .skip((page * limit) - limit).limit(limit)
             .then((result) => {
-                if(!result) {
+                if(result == null || result.length == 0){
                     throw new HTTPException("There are now videos", HTTP.NOT_FOUND);
                 }
         
-                return res.status(HTTP.OK).json(result);
+                return result;
             });
+
+            const count = await Video.countDocuments();
+            const pageCount = Math.ceil(count/limit);
+
+            return res.status(HTTP.OK).json({'pageCount' : pageCount, videos});
+
         }
         
     }
@@ -174,25 +205,33 @@ const updateVideo = async (req, res) => {
             category_id
         } = req.body;
 
-        const author = await User.findById({'_id' : author_id})
-        .catch(err => {if(err) throw new HTTPException("Wrong author id", HTTP.BAD_REQUEST)})
-        .then(result => {
-            if(result == null || result.length == 0) {
-                throw new HTTPException("Cant find any user by that id", HTTP.BAD_REQUEST)
-            }
+        let author = ""
+        let category = ""
 
-            return result;
-        });
-
-        const category = await Category.findById({'_id' : category_id})
-        .catch(err => {if(err) throw new HTTPException("Wrong id", HTTP.BAD_REQUEST)})
-        .then(result => {
-            if(result == null || result.length == 0) {
-                throw new HTTPException("Cant find any category by that id", HTTP.NOT_FOUND);
-            }
-
-            return result;
-        });
+        if(author_id && author_id != "" && author_id != undefined) {
+            author = await User.findById({'_id' : author_id})
+            .catch(err => {if(err) throw new HTTPException("Wrong author id", HTTP.BAD_REQUEST)})
+            .then(result => {
+                if(result == null || result.length == 0) {
+                    throw new HTTPException("Cant find any user by that id", HTTP.BAD_REQUEST)
+                }
+    
+                return result;
+            });
+        }
+        
+        if(category_id && category_id != "" && category_id != undefined) {
+            category = await Category.findById({'_id' : category_id})
+            .catch(err => {if(err) throw new HTTPException("Wrong id", HTTP.BAD_REQUEST)})
+            .then(result => {
+                if(result == null || result.length == 0) {
+                    throw new HTTPException("Cant find any category by that id", HTTP.NOT_FOUND);
+                }
+    
+                return result;
+            });
+        }
+        
 
         const updatedVideo = await Video.findById({'_id' : video_id})
         .catch(err => {if(err) throw new HTTPException("Wrong id", HTTP.BAD_REQUEST)})
@@ -204,18 +243,18 @@ const updateVideo = async (req, res) => {
             return result;
         });
 
-        if(title) updatedVideo.title = title;
+        if(title && title != "" && title != undefined) updatedVideo.title = title;
 
-        if(author_id) {
+        if(author != "" && author != undefined) {
             updatedVideo.author_id = author_id;
             updatedVideo.author_username = author.username;
         }
 
-        if(description) updatedVideo.description = description;
+        if(description && description != "" && description != undefined) updatedVideo.description = description;
 
-        if(video) updatedVideo.video = video;
+        if(video && video != "" && video != undefined) updatedVideo.video = video;
 
-        if(category_id) {
+        if(category != "" && category != undefined) {
             updatedVideo.category_id = category_id
             updatedVideo.category_name = category.title
         }
@@ -228,7 +267,7 @@ const updateVideo = async (req, res) => {
     catch(exception) {
         if(!(exception instanceof HTTPException)) {
             exception.statusCode = HTTP.INTERNAL_SERVER_ERROR;
-            exception.message = "ARTICLE: Somethind went wrong"
+            exception.message = "Somethind went wrong"
         }
         return res.status(exception.statusCode).json({ message: exception.message });
     }
@@ -271,6 +310,7 @@ const deleteVideo = async (req, res) => {
 
 
 module.exports = {
+    getVideo,
     getVideos,
     getVideosByCat,
     addVideo,

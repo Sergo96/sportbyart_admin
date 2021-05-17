@@ -128,7 +128,7 @@ const Categories = (props) => {
                       </button>
                       <Link
                         className='btn btn-primary btn-sm'
-                        to={`/addCategory/${category._id}`}
+                        to={`/editCategory/${category._id}`}
                       >
                         Edit
                       </Link>
@@ -168,7 +168,7 @@ const Categories = (props) => {
                       </button>
                       <Link
                         className='btn btn-primary btn-sm'
-                        to={`/EditArticle/${subcategory._id}`}
+                        to={`/addSubCategory/${subcategory._id}`}
                       >
                         Edit
                       </Link>

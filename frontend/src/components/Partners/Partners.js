@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 
 const Partners = (props) => {
   const [partners, setPartners] = useState([]);
@@ -18,8 +17,9 @@ const Partners = (props) => {
     };
     fetchBlogs();
   }, []);
-
+  // funtion to delet partner
   const deletePartner = (partnerId) => {
+    //deleting partner by id
     const requestOptions = {
       method: 'DELETE',
       headers: {
@@ -27,11 +27,9 @@ const Partners = (props) => {
         'Content-Type': 'application/json',
         authorization: `${userToken}`,
       },
-      // authorization: `${userToken}`,
     };
 
     // Note: I'm using arrow functions inside the `.fetch()` method.
-    // This makes it so you don't have to bind component functions like `setState`
     // to the component.
     fetch(
       `${process.env.REACT_APP_API_URL}/partners/delete/` + partnerId,
@@ -69,7 +67,7 @@ const Partners = (props) => {
                     className='btn btn-danger btn-sm'
                     style={{ marginRight: '10px' }}
                     onClick={() => {
-                      deletePartner(partner._id);
+                      deletePartner(partner._id); // taking id here
                     }}
                   >
                     Delete

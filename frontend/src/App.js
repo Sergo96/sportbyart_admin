@@ -22,6 +22,7 @@ import SendLetterSubscriber from './components/SendLetterSubscriber/SendLetterSu
 import AddPartners from './components/AddPartners/AddPartners';
 import Partners from './components/Partners/Partners';
 import Comments from './components/Comments/Comments';
+import Settings from './components/Settings/Settings';
 
 function App() {
   const [authTokens, setAuthTokens] = useState(
@@ -40,8 +41,6 @@ function App() {
 
   const { pathname } = useLocation();
 
-  // console.log(authTokens['dataValues']);
-
   return (
     <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
       <Switch>
@@ -53,7 +52,7 @@ function App() {
             <Route exact path='/addArticle'>
               <AddArticle token={token} />
             </Route>
-            <Route exact path='/articles'>
+            <Route exact path='/articles/:page'>
               <Articles token={token} />
             </Route>
             <Route exact path='/EditArticle/:id'>
@@ -62,10 +61,13 @@ function App() {
             <Route exact path='/addCategory'>
               <AddCategory token={token} />
             </Route>
-            <Route exact path='/addCategory/:id'>
+            <Route exact path='/editCategory/:id'>
               <AddCategory token={token} />
             </Route>
             <Route exact path='/addSubCategory'>
+              <AddSubCategory token={token} />
+            </Route>
+            <Route exact path='/addSubCategory/:id'>
               <AddSubCategory token={token} />
             </Route>
             <Route exact path='/categories'>
@@ -75,7 +77,7 @@ function App() {
             <Route exact path='/addUser'>
               <AddUser token={token} />
             </Route>
-            <Route exact path='/editUserList'>
+            <Route exact path='/editUserList/:page'>
               <EditUserList token={token} />
             </Route>
             <Route exact path='/editUser/:id'>
@@ -84,10 +86,13 @@ function App() {
             <Route exact path='/addVideo'>
               <AddVideo token={token} />
             </Route>
-            <Route exact path='/videos'>
+            <Route exact path='/editVideo/:id'>
+              <AddVideo token={token} />
+            </Route>
+            <Route exact path='/videos/:page'>
               <Videos token={token} />
             </Route>
-            <Route exact path='/subscribers'>
+            <Route exact path='/subscribers/:page'>
               <Subscribers token={token} />
             </Route>
             <Route exact path='/sendLetterSubscriber'>
@@ -99,8 +104,11 @@ function App() {
             <Route exact path='/partners'>
               <Partners token={token} />
             </Route>
-            <Route exact path='/comments'>
+            <Route exact path='/comments/:page'>
               <Comments token={token} />
+            </Route>
+            <Route exact path='/settings'>
+              <Settings token={token} />
             </Route>
           </LayOut>
         ) : (

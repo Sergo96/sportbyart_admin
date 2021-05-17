@@ -1,3 +1,5 @@
+// Here is the most importnat files with bunch of bugs
+
 import React, { useState, useRef, useEffect } from 'react';
 import 'antd/dist/antd.css';
 import { Input } from 'antd';
@@ -12,8 +14,8 @@ const AddArticle = (props) => {
   const [content, setContent] = useState('');
   const [baseImage, setBaseImage] = useState('');
   const [baseImages, setBaseImages] = useState([]);
-  // console.log('multiple image', baseImage);
 
+  // here i created array to push slider images
   let slider_images = [];
 
   // slider_images.push(baseImages);
@@ -22,7 +24,6 @@ const AddArticle = (props) => {
   console.log('multiple images', baseImages);
 
   const [titleValue, setTitleValue] = useState('');
-  // console.log('title', titleValue);
   const [shortDesc, setShortDesc] = useState('');
   const [getCategory, setGetCategory] = useState([]);
   const [getSubCategory, setSubGetCategory] = useState([]);
@@ -31,23 +32,20 @@ const AddArticle = (props) => {
 
   console.log('sliderimage', sliderImage);
 
+  //  here i created array to push deleted images into one array and send put request to delete them! but here is one problem i could combine arrays here!
   let deleted_images = [];
-  deleted_images.push(sliderImage);
+  deleted_images.concat(sliderImage);
 
   console.log('deleted array', deleted_images);
 
   console.log('edit values', editValues);
 
-  // console.log('current article stuuufff', editValues);
-
+  // here i take article id from url to get values of existing article to edit
   const params = useParams();
-  // console.log(params);
   const resultsId = params.id;
-  // console.log('kategorianer', getSubCategory);
 
   const [getCategoryId, setGetCategoryId] = useState('');
   const [getSubCategoryId, setGetSubCategoryId] = useState('');
-  // console.log('subcategory id', getSubCategoryId);
 
   const [authTokens, setAuthTokens] = useState(
     localStorage.getItem('token') || ''
@@ -61,6 +59,7 @@ const AddArticle = (props) => {
   const userToken = props.token;
   console.log(userToken);
 
+  // here i am geting artilces valu to display them!
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -92,16 +91,12 @@ const AddArticle = (props) => {
   }, [resultsId]);
 
   console.log('slider key', slider_images);
-  // const categoryIdforSub = getCategoryId;
-
-  // console.log('article tokeeeen', userToken);
-
-  // console.log(baseImage);
 
   const config = {
     readonly: false, // all options from https://xdsoft.net/jodit/doc/
   };
 
+  // function to convert single image into base64
   const uploadImage = async (e) => {
     console.log(e.target.files);
     const file = e.target.files[0];
@@ -110,6 +105,7 @@ const AddArticle = (props) => {
     setBaseImage(base64);
   };
 
+  // function to convert multiple images into base64
   const uploadImages = async (e) => {
     console.log('dude this is', e.target.files);
     const file = e.target.files;
@@ -124,13 +120,30 @@ const AddArticle = (props) => {
     // console.log(base64);
   };
 
+  // function of converting base64
+  const covertBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  };
+
+  // function to upload article
   const uploadArticle = async (event) => {
     const articletData = {
       title: titleValue,
       shortDesc: shortDesc,
       content: content,
       category: getCategoryId,
-      subCategory: getSubCategoryId,
+      subCategory: getSubCategoryId, // here is bug sometimes it takes sub category id sometimes not
       image: baseImage,
       slider: baseImages,
     };
@@ -158,21 +171,7 @@ const AddArticle = (props) => {
     }
   };
 
-  const covertBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const fileReader = new FileReader();
-      fileReader.readAsDataURL(file);
-
-      fileReader.onload = () => {
-        resolve(fileReader.result);
-      };
-
-      fileReader.onerror = (error) => {
-        reject(error);
-      };
-    });
-  };
-
+  // function to get all categories
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -183,9 +182,9 @@ const AddArticle = (props) => {
       } catch (err) {}
     };
     fetchData();
-    // console.log(fetchData());
   }, []);
 
+  // function to get sub categories
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -205,16 +204,9 @@ const AddArticle = (props) => {
   // PUT request using fetch with async/await
   async function updatePost() {
     let articletData = {
-      // title: titleValue,
-      // shortDesc: shortDesc,
-      // content: content,
-      // category: getCategoryId,
-      // subCategory: getSubCategoryId,
-      // image: baseImage,
-      // slider: baseImages,
       articleId: resultsId,
     };
-
+    // here i am checking if value edited or not!
     if (titleValue !== editValues.article.title) {
       articletData.title = titleValue;
     }
@@ -232,14 +224,16 @@ const AddArticle = (props) => {
     }
     if (baseImage !== '') {
       articletData.image = baseImage;
-      console.log('yooooooooo');
     }
-    if (baseImages !== []) {
-      articletData.newSlider = baseImages;
-    }
-    if (deleted_images !== []) {
-      articletData.deleteSlider = deleted_images;
-    }
+
+    // here filtering of images to send exactly base64 into newslider
+    articletData.newSlider = baseImages.filter((image) => {
+      return !image.includes(process.env.REACT_APP_API_URL); // here i had bugs but now it works! but need to be checked :-D
+    });
+
+    articletData.deleteSlider = deleted_images.map(
+      (image) => image.replace(process.env.REACT_APP_API_URL, '') // here i am replacing the localhost url! and sending only path of image
+    );
 
     const requestOptions = {
       method: 'PUT',
@@ -255,7 +249,6 @@ const AddArticle = (props) => {
       requestOptions
     );
     const data = await response.json();
-    // setPostId(data.id);
   }
 
   return (
@@ -268,7 +261,7 @@ const AddArticle = (props) => {
           placeholder='title'
           autoSize
           value={titleValue}
-          onChange={(input) => setTitleValue(input.target.value)}
+          onChange={(input) => setTitleValue(input.target.value)} // here taking values
         />
         <div style={{ margin: '24px 0' }} />
         <TextArea
@@ -324,7 +317,15 @@ const AddArticle = (props) => {
             }}
           />
         </div>
-        <img src={baseImage} alt='' />
+        <img
+          style={{
+            width: '500px',
+            display: 'flex',
+            padding: '20px',
+          }}
+          src={baseImage}
+          alt=''
+        />
 
         <div style={{ marginTop: '30px' }} className='upload__images'>
           <h1>choose multiple pictures</h1>
@@ -336,6 +337,7 @@ const AddArticle = (props) => {
             multiple
           />
           {baseImages.map((i) => {
+            // looping to show slider images
             return (
               <div
                 style={{ display: 'flex', alignItems: 'center' }}
@@ -358,11 +360,6 @@ const AddArticle = (props) => {
               </div>
             );
           })}
-          {/* <img src={baseImages} alt='' /> */}
-
-          {/* <button type='submit' onClick={uploadMultiple}>
-            Upload images
-          </button> */}
         </div>
 
         <button

@@ -1,19 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 const EditUserList = (props) => {
   let a = 0;
   const [users, setUsers] = useState([]);
+  const [userPageNumber, setUserPageNumber] = useState();
+  console.log('pages', userPageNumber);
+
   console.log('users', users);
 
   const userToken = props.token;
 
+  const params = useParams();
+  // here is params of page numbers
+  let pageNumLink = params.page;
+
+  // geting user data
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/user/list`,
+          `${process.env.REACT_APP_API_URL}/user/list/${pageNumLink}`,
           {
             headers: {
               Accept: 'application/json',
@@ -22,11 +31,28 @@ const EditUserList = (props) => {
             },
           }
         );
-        setUsers(res.data);
+        setUsers(res.data.users);
+        setUserPageNumber(res.data.pageCount);
       } catch (err) {}
     };
     fetchBlogs();
-  }, []);
+  }, [pageNumLink]);
+
+  // here is pagination logic which works horrible
+  var pagesArray = [];
+  let pageMinus = 3;
+  let pagePlus = 10;
+
+  if (pageNumLink < 3) {
+    pageMinus = 0;
+  }
+
+  if (userPageNumber - pageNumLink < 10) {
+    pagePlus = 0;
+  }
+  for (let i = pageNumLink - pageMinus; i < userPageNumber + pagePlus; i++) {
+    pagesArray.push(<Link to={`/editUserList/${i}`}>{i}</Link>);
+  }
 
   const deleteUser = (userId) => {
     const requestOptions = {
@@ -55,7 +81,7 @@ const EditUserList = (props) => {
   };
   return (
     <div>
-      <h4>Article's list</h4>
+      <h4>User's list</h4>
       <table className='table'>
         <thead>
           <tr>
@@ -99,6 +125,12 @@ const EditUserList = (props) => {
           })}
         </tbody>
       </table>
+      <div className='pagination'>
+        <a>&laquo;</a>
+        {pagesArray}
+
+        <a href='#'>&raquo;</a>
+      </div>
     </div>
   );
 };

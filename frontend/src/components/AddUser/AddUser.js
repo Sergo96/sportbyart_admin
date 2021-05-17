@@ -6,19 +6,13 @@ import axios from 'axios';
 
 const AddUser = (props) => {
   const [usernameAdd, setUsernameAdd] = useState('');
-  console.log(usernameAdd);
   const [emailAdd, setEmailAdd] = useState('');
-  console.log(emailAdd);
   const [passwordAdd, setPasswordAdd] = useState('');
-  console.log(passwordAdd);
   const [editUser, setEditUser] = useState([]);
-
-  console.log('user values', editUser);
 
   const userToken = props.token;
 
   const params = useParams();
-  // console.log(params);
   const resultsId = params.id;
 
   console.log('user id', resultsId);
@@ -69,16 +63,6 @@ const AddUser = (props) => {
         setEditUser(res.data);
         setUsernameAdd(res.data.username);
         setEmailAdd(res.data.email);
-
-        // setBaseImage(
-        //   `${process.env.REACT_APP_API_URL}` + res.data.article.image
-        // );
-
-        // Object.keys(res.data.slider).forEach((key) => {
-        //   console.log('keeey', key);
-        //   const sliderKey = res.data.slider[key];
-        //   setBaseImages(`${process.env.REACT_APP_API_URL}` + sliderKey.image);
-        // });
       } catch (err) {}
     };
     fetchData();
@@ -97,7 +81,6 @@ const AddUser = (props) => {
     }
     if (passwordAdd !== '') {
       userData.password = passwordAdd;
-      console.log('yooooooooo');
     }
 
     const requestOptions = {
@@ -114,7 +97,6 @@ const AddUser = (props) => {
       requestOptions
     );
     const data = await response.json();
-    // setPostId(data.id);
   }
 
   return (

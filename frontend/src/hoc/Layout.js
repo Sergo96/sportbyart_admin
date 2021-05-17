@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import 'antd/dist/antd.css';
-import { Layout, Menu, Input, Row, Col, Button } from 'antd';
-import {
-  MailOutlined,
-  CalendarOutlined,
-  AppstoreOutlined,
-  SettingOutlined,
-  LinkOutlined,
-  PoweroffOutlined,
-} from '@ant-design/icons';
+import { Layout, Menu, Input } from 'antd';
+import { AppstoreOutlined, SettingOutlined } from '@ant-design/icons';
 import logoAdmin from '../assets/admin_logo.png';
-import { Link, Redirect, useHistory } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import { removeToken } from '../useToken/useToken';
 
+// Ant design stuff  https://ant.design/
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
 
@@ -24,6 +19,7 @@ const LayOut = (props) => {
     history.push(`/searchResults/${search}`);
   };
 
+  // here is for logo on click
   const homeClick = () => {
     history.push(`/`);
   };
@@ -37,7 +33,8 @@ const LayOut = (props) => {
 
   console.log('search result', search);
 
-  const sendSearch = async (event) => {
+  // sending search string to search results
+  const sendSearch = async () => {
     // event.preventDefault();
     const searchDatas = {
       title: search,
@@ -61,6 +58,8 @@ const LayOut = (props) => {
       console.log(err);
     }
   };
+
+  // i used ant design for responsive css
   return (
     <div>
       <Layout style={{ minHeight: '100vh' }}>
@@ -75,6 +74,7 @@ const LayOut = (props) => {
           }}
           style={{ background: '#ffffff', color: 'black' }}
         >
+          {/* logo */}
           <div
             style={{
               display: 'flex',
@@ -88,6 +88,7 @@ const LayOut = (props) => {
             <img style={{ width: '100px' }} src={logoAdmin} alt='' />
           </div>
 
+          {/* sidebar menu stuff */}
           <Menu
             style={{ width: '100%' }}
             defaultSelectedKeys={['1']}
@@ -100,7 +101,7 @@ const LayOut = (props) => {
                 <Link to='/addArticle'>Add Article</Link>
               </Menu.Item>
               <Menu.Item key='4'>
-                <Link to='/articles'>Articles</Link>
+                <Link to='/articles/1'>Articles</Link>
               </Menu.Item>
               <SubMenu key='sub1-2' title='Submenu'>
                 <Menu.Item key='5'>Option 5</Menu.Item>
@@ -123,12 +124,12 @@ const LayOut = (props) => {
                 <Link to='/addVideo'>Add Video</Link>
               </Menu.Item>
               <Menu.Item key='11'>
-                <Link to='/videos'>Videos</Link>
+                <Link to='/videos/1'>Videos</Link>
               </Menu.Item>
             </SubMenu>
             <SubMenu key='sub4' icon={<SettingOutlined />} title='Subscribers'>
               <Menu.Item key='12'>
-                <Link to='/subscribers'>Subscribers</Link>
+                <Link to='/subscribers/1'>Subscribers</Link>
               </Menu.Item>
               <Menu.Item key='13'>
                 <Link to='/sendLetterSubscriber'>
@@ -145,7 +146,7 @@ const LayOut = (props) => {
               </Menu.Item>
             </SubMenu>
             <Menu.Item key='16'>
-              <Link to='/comments'>Comments</Link>
+              <Link to='/comments/1'>Comments</Link>
             </Menu.Item>
           </Menu>
         </Sider>
@@ -154,6 +155,7 @@ const LayOut = (props) => {
             className='site-layout-sub-header-background'
             style={{ background: '#ffffff', color: '#1c1c1c' }}
           >
+            {/* header menu settings */}
             <Menu mode='horizontal'>
               <SubMenu key='SubMenu' icon={<SettingOutlined />} title='User'>
                 <Menu.ItemGroup title='Item 1'>
@@ -161,12 +163,18 @@ const LayOut = (props) => {
                     <Link to='/addUser'>Add User</Link>
                   </Menu.Item>
                   <Menu.Item key='setting:2'>
-                    <Link to='/editUserList'>Edit Users</Link>
+                    <Link to='/editUserList/1'>Edit Users</Link>
                   </Menu.Item>
                 </Menu.ItemGroup>
                 <Menu.ItemGroup title='Item 2'>
-                  <Menu.Item key='setting:3'>Logout</Menu.Item>
-                  <Menu.Item key='setting:4'>Settings 4</Menu.Item>
+                  <Menu.Item key='setting:3'>
+                    <Link to='/login' onClick={removeToken}>
+                      Logout
+                    </Link>
+                  </Menu.Item>
+                  <Menu.Item key='setting:4'>
+                    <Link to='/settings'>Settings</Link>
+                  </Menu.Item>
                 </Menu.ItemGroup>
               </SubMenu>
               <Menu.Item disabled>

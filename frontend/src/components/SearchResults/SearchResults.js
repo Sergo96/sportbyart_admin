@@ -1,20 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 
 const SearchResults = () => {
   const [searchData, setSearchData] = useState([]);
 
-  console.log(searchData);
   const params = useParams();
-  console.log(params);
-  const resultsId = params.str;
-  console.log(resultsId);
+  const resultsId = params.str; // i am taking string from url link
 
   useEffect(() => {
     const searchDatas = {
-      title: resultsId,
+      title: resultsId, //and here i send that string
     };
     const requestOptions = {
       method: 'POST',
@@ -26,7 +22,7 @@ const SearchResults = () => {
     };
     fetch(`${process.env.REACT_APP_API_URL}/article/search`, requestOptions)
       .then((response) => response.json())
-      .then((data) => setSearchData(data));
+      .then((data) => setSearchData(data)); // and geting data here
   }, [resultsId]);
 
   let a = 0;
@@ -48,6 +44,7 @@ const SearchResults = () => {
         </thead>
         <tbody>
           {searchData.map((article) => {
+            // after looping articles here
             return (
               <tr>
                 <th scope='row'>{a++}</th>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Input } from 'antd';
 import 'antd/dist/antd.css';
 
@@ -9,8 +9,8 @@ const SendLetterSubscriber = (props) => {
   const [subject, setSubject] = useState('');
   const [letter, setLetter] = useState('');
 
-  const addVideo = async (event) => {
-    const videoData = {
+  const sendLetter = async (event) => {
+    const letterData = {
       subject: subject,
       text: letter,
     };
@@ -27,7 +27,7 @@ const SendLetterSubscriber = (props) => {
             'Content-Type': 'application/json',
             authorization: `${userToken}`,
           },
-          body: JSON.stringify(videoData),
+          body: JSON.stringify(letterData),
         }
       );
 
@@ -63,7 +63,7 @@ const SendLetterSubscriber = (props) => {
       />
       <br />
       <br />
-      <button onClick={addVideo}>Submit</button>
+      <button onClick={sendLetter}>Submit</button>
     </div>
   );
 };

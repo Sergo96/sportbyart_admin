@@ -10,6 +10,7 @@ const AddPartners = (props) => {
 
   const userToken = props.token;
 
+  //  this is to upload image
   const uploadImage = async (e) => {
     console.log(e.target.files);
     const file = e.target.files[0];
@@ -18,6 +19,7 @@ const AddPartners = (props) => {
     setPartnerImage(base64);
   };
 
+  // this is to convert image into base64
   const covertBase64 = (file) => {
     return new Promise((resolve, reject) => {
       const fileReader = new FileReader();
@@ -33,6 +35,7 @@ const AddPartners = (props) => {
     });
   };
 
+  // this function to updload partners data!
   const uploadPartner = async (event) => {
     const PartnertData = {
       title: partnerTitle,

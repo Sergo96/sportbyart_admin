@@ -1,17 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Link, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 const Subscribers = (props) => {
   const userToken = props.token;
   let a = 0;
   const [subscirbers, setSubscribers] = useState([]);
-  console.log('subscribers', subscirbers);
+  const [subscriberPageNum, setSubscriberPageNum] = useState(); //here i have page numbers
+
+  const params = useParams();
+  // here is params of page numbers
+  let pageNumLink = params.page;
+
+  // this is to go back function
+  const history = useHistory();
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/subscribe/list`,
+          `${process.env.REACT_APP_API_URL}/subscribe/list/${pageNumLink}`,
           {
             headers: {
               Accept: 'application/json',
@@ -20,11 +28,12 @@ const Subscribers = (props) => {
             },
           }
         );
-        setSubscribers(res.data);
+        setSubscribers(res.data.subscribers);
+        setSubscriberPageNum(res.data.pageCount);
       } catch (err) {}
     };
     fetchBlogs();
-  }, []);
+  }, [pageNumLink]);
 
   const deleteSubscriber = (subscriberId) => {
     const requestOptions = {
@@ -51,9 +60,27 @@ const Subscribers = (props) => {
         console.log(result);
       });
   };
+
+  // pagination code!
+
+  var pagesArray = [];
+  let pageMinus = 3;
+  let pagePlus = 10;
+
+  if (pageNumLink < 3) {
+    pageMinus = 0;
+  }
+
+  if (subscriberPageNum - pageNumLink < 10) {
+    pagePlus = 0;
+  }
+  for (let i = pageNumLink - pageMinus; i < subscriberPageNum + pagePlus; i++) {
+    pagesArray.push(<Link to={`/subscribers/${i}`}>{i}</Link>);
+  }
+
   return (
     <div className='subscribers'>
-      <h4>Article's list</h4>
+      <h4>Subscriber's list</h4>
       <table className='table'>
         <thead>
           <tr>
@@ -79,18 +106,18 @@ const Subscribers = (props) => {
                   >
                     Delete
                   </button>
-                  <Link
-                    className='btn btn-primary btn-sm'
-                    to={`/EditArticle/${subscriber._id}`}
-                  >
-                    Edit
-                  </Link>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      <div className='pagination'>
+        <a onClick={() => history.goBack()}>&laquo;</a>
+        {/*this button doesn't work */}
+        {pagesArray}
+        <a href='#'>&raquo;</a>
+      </div>
     </div>
   );
 };

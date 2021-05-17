@@ -1,24 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useHistory } from 'react-router-dom';
+import { useParams } from 'react-router';
 
 const Comments = (props) => {
   const userToken = props.token;
   const [getComments, setGetComments] = useState([]);
-  console.log(getComments);
+  const [commentPageNum, setCommentPageNum] = useState(); //here i have page numbers
   let a = 0;
+
+  const params = useParams();
+  // here is params of page numbers
+  let pageNumLink = params.page;
+
+  // this is to go back function
+  const history = useHistory();
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/comment/list`
+          `${process.env.REACT_APP_API_URL}/comment/get/list/${pageNumLink}`
         );
-        setGetComments(res.data);
+        setGetComments(res.data.comments);
+        setCommentPageNum(res.data.pageCount);
       } catch (err) {}
     };
     fetchBlogs();
-  }, []);
+  }, [pageNumLink]);
 
   const deleteComment = (commentId) => {
     const requestOptions = {
@@ -46,9 +55,26 @@ const Comments = (props) => {
       });
   };
 
+  // here the same pagination bugs
+
+  var pagesArray = [];
+  let pageMinus = 3;
+  let pagePlus = 10;
+
+  if (pageNumLink < 3) {
+    pageMinus = 0;
+  }
+
+  if (commentPageNum - pageNumLink < 10) {
+    pagePlus = 0;
+  }
+  for (let i = pageNumLink - pageMinus; i < commentPageNum + pagePlus; i++) {
+    pagesArray.push(<Link to={`/comments/${i}`}>{i}</Link>);
+  }
+
   return (
     <div>
-      <h4>Partner's list</h4>
+      <h4>Comment's list</h4>
       <table className='table'>
         <thead>
           <tr>
@@ -80,18 +106,18 @@ const Comments = (props) => {
                   >
                     Delete
                   </button>
-                  <Link
-                    className='btn btn-primary btn-sm'
-                    to={`/EditArticle/${comment._id}`}
-                  >
-                    Edit
-                  </Link>
                 </td>
               </tr>
             );
           })}
         </tbody>
       </table>
+      <div className='pagination'>
+        <a onClick={() => history.goBack()}>&laquo;</a>
+        {/*this button doesn't work */}
+        {pagesArray}
+        <a href='#'>&raquo;</a>
+      </div>
     </div>
   );
 };
