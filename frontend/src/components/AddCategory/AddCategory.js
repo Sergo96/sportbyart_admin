@@ -29,7 +29,7 @@ const AddCategory = (props) => {
   const addCategory = async (event) => {
     const categoryData = {
       title: categoryName,
-      show_in_nav: showInNav,
+      show_in_nav: showInNav, // this is very important this will show category in navbar
     };
 
     event.preventDefault();
